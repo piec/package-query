@@ -117,6 +117,7 @@ typedef struct _aq_config
 	char format_out[PATH_MAX];
 	char *rootdir;
 	char sort;
+	int reverse;
 } aq_config;
 
 aq_config config;
@@ -206,7 +207,7 @@ char * ttostr (time_t t);
 typedef const char *(*printpkgfn)(void *, unsigned char);
 void format_str (char *s);
 char *pkg_to_str (const char * target, void * pkg, printpkgfn f, const char *format);
-void print_package (const char * target, void * pkg, printpkgfn f);
+void print_package (const char * target, void * pkg, printpkgfn f, size_t count);
 
 /* Results */
 void print_or_add_result (void *pkg, unsigned short type);

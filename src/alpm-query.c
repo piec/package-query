@@ -297,7 +297,7 @@ int search_pkg_by_type (alpm_db_t *db, alpm_list_t **targets, int query_type)
 				{
 					ret++;
 					if (target_arg_add (ta, t->data, pkg))
-						print_package (t->data, pkg, alpm_pkg_get_str);
+						print_package (t->data, pkg, alpm_pkg_get_str, 0);
 				}
 				target_free (t2);
 			}
@@ -333,7 +333,7 @@ int search_pkg_by_name (alpm_db_t *db, alpm_list_t **targets)
 		{
 			ret++;
 			if (target_arg_add (ta, target, pkg_found))
-				print_package (target, pkg_found, alpm_pkg_get_str);
+				print_package (target, pkg_found, alpm_pkg_get_str, 0);
 		}
 		target_free (t1);
 	}
@@ -358,7 +358,7 @@ int list_grp (alpm_db_t *db, alpm_list_t *targets)
 				ret++;
 				for (i=grp->packages; i; i=alpm_list_next (i))
 					print_package (grp->name,
-					    i->data, alpm_pkg_get_str);
+					    i->data, alpm_pkg_get_str, 0);
 			}
 		}
 	}
@@ -367,7 +367,7 @@ int list_grp (alpm_db_t *db, alpm_list_t *targets)
 		for(t = alpm_db_get_groupcache(db); t; t = alpm_list_next(t))
 		{
 			ret++;
-			print_package ("", t->data, alpm_grp_get_str);
+			print_package ("", t->data, alpm_grp_get_str, 0);
 		}
 	}
 	return ret;

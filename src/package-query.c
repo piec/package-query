@@ -106,6 +106,7 @@ void init_config (const char *myname)
 	strcpy (config.format_out, "");
 	config.rootdir = NULL;
 	config.sort = 0;
+	config.reverse = 0;
 }
 
 
@@ -134,6 +135,7 @@ void usage (unsigned short _error)
 	fprintf(stderr, "\n\t-q --quiet           quiet");
 	fprintf(stderr, "\n\t-x --escape          escape \" on output");
 	fprintf(stderr, "\n\t--sort [n,w,1,2]     sort by name, votes, install date, size");
+	fprintf(stderr, "\n\t--reverse            reverse results order");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\n\t-A --aur             query AUR database");
 	fprintf(stderr, "\n\t-Q --query           search in local database");
@@ -248,6 +250,7 @@ int main (int argc, char **argv)
 		{"qrequires",  no_argument,       0, 1013},
 		{"color",      no_argument,       0, 1014},
 		{"version",    no_argument,       0, 'v'},
+		{"reverse",    no_argument,       0, 1015},
 
 		{0, 0, 0, 0}
 	};
@@ -397,6 +400,9 @@ int main (int argc, char **argv)
 			case 1014: /* --color */
 				config.colors=1;
 				break;
+			case 1015: /* --reverse */
+				config.reverse=1;
+				break;
 			case 'u':
 				config.filter |= F_UPGRADES;
 				break;
@@ -469,7 +475,7 @@ int main (int argc, char **argv)
 				fprintf(stderr, "unable to read %s.\n", filename);
 				continue;
 			}
-			print_package (filename, pkg, alpm_pkg_get_str);
+			print_package (filename, pkg, alpm_pkg_get_str, 0);
 			ret++;
 		}
 		cleanup(!ret);

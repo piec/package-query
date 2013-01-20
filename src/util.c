@@ -140,9 +140,9 @@ static int results_votes_cmp (const results_t *r1, const results_t *r2)
 
 void print_or_add_result (void *pkg, unsigned short type)
 {
-	if (config.sort==0)
+	if (config.sort==0 && config.reverse==0)
 	{
-		print_package ("", pkg, (type == R_ALPM_PKG) ? alpm_pkg_get_str : aur_get_str);
+		print_package ("", pkg, (type == R_ALPM_PKG) ? alpm_pkg_get_str : aur_get_str, 0);
 		return;
 	}
 	else
@@ -163,16 +163,34 @@ void show_results ()
 			case 'w': fn_cmp = (alpm_list_fn_cmp) results_votes_cmp; break;
 			case '1': fn_cmp = (alpm_list_fn_cmp) results_installdate_cmp; break;
 			case '2': fn_cmp = (alpm_list_fn_cmp) results_isize_cmp; break;
+			case 0: break;
 		}
-		if (fn_cmp)
-			results = alpm_list_msort (results, alpm_list_count (results), fn_cmp);
-		for(i = results; i; i = alpm_list_next(i))
+		size_t count = 0;
+		if (fn_cmp || config.reverse) {
+			count = alpm_list_count (results);
+		}
+
+		if (fn_cmp) {
+			results = alpm_list_msort (results, count, fn_cmp);
+		}
+
+		if(config.reverse)
+			i = alpm_list_last(results);
+		else
+			i = results;
+
+		while(i)
 		{
 			results_t *r = i->data;
 			if (r->type == R_ALPM_PKG)
-				print_package ("", r->ele, alpm_pkg_get_str);
+				print_package ("", r->ele, alpm_pkg_get_str, count);
 			else if (r->type == R_AUR_PKG)
-				print_package ("", r->ele, aur_get_str);
+				print_package ("", r->ele, aur_get_str, count);
+
+			if(config.reverse)
+				i = alpm_list_previous(i);
+			else
+				i = alpm_list_next(i);
 		}
 		alpm_list_free_inner (results, (alpm_list_fn_free) results_free);
 		alpm_list_free (results);
@@ -651,20 +669,30 @@ static void indent (const char *str)
 		fprintf (stdout, "%s\n", c);
 }
 
-void color_print_package (void * p, printpkgfn f)
+void color_print_package (void * p, printpkgfn f, size_t count)
 {
 	string_t *cstr;
-	static int number=0;
+	static int number=-1;
 	const char *info, *lver;
 	char *ver=NULL;
 	int aur=(f == aur_get_str);
 	int grp=(f == alpm_grp_get_str);
 	cstr=string_new ();
 
+	if(number == -1) {
+		number = (count > 0) ? (count) : 1;
+	}
+
 	/* Numbering list */
-	if (config.numbering)
+	if (config.numbering) {
 		cstr = string_fcat (cstr, "%s%d%s ",
-		    color (C_NB), ++number, color (C_NO));
+		    color (C_NB), number, color (C_NO));
+
+		if(count > 0)
+			number--;
+		else
+			number++;
+	}
 
 	/* repo/name */
 	if (config.aur_foreign)
@@ -808,10 +836,10 @@ void color_print_package (void * p, printpkgfn f)
 	fprintf (stdout, "%s", color(C_NO));
 }
 
-void print_package (const char * target, void * pkg, printpkgfn f)
+void print_package (const char * target, void * pkg, printpkgfn f, size_t count)
 {
 	if (config.quiet) return;
-	if (!config.custom_out) { color_print_package (pkg, f); return; }
+	if (!config.custom_out) { color_print_package (pkg, f, count); return; }
 	char *s = pkg_to_str (target, pkg, f, config.format_out);
 	if (config.escape)
 		print_escape (s);

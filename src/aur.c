@@ -585,7 +585,7 @@ static int aur_request (alpm_list_t **targets, int type)
 					 */
 					if (target_arg_add (ta, one_target->orig, (void *) pkgname))
 						print_package (one_target->orig,
-						    p->data, aur_get_str);
+						    p->data, aur_get_str, 0);
 				}
 			}
 			alpm_list_free_inner (pkgs, (alpm_list_fn_free) aur_pkg_free);
